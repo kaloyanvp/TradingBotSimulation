@@ -35,6 +35,13 @@ public class BotController {
         this.scheduler.stop();
     }
 
+    @PostMapping("/reset")
+    public String reset() {
+        scheduler.stop();
+        resetService.resetAll();
+        return "System reset complete";
+    }
+
     @GetMapping("/train")
     public String train() {
         trainingService.runBacktest();

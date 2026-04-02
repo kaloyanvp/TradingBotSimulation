@@ -22,6 +22,45 @@ function formatShortTime(timestamp) {
     });
 }
 
+function CustomTooltip({ active, payload }) {
+    if (!active || !payload || !payload.length) {
+        return null;
+    }
+
+    const data = payload[0].payload;
+
+    return (
+        <div
+            style={{
+                background: "#111827",
+                border: "1px solid #334155",
+                padding: "10px",
+                borderRadius: "8px",
+                color: "#e2e8f0",
+            }}
+        >
+            <p style={{ margin: "0 0 6px 0" }}>
+                <strong>Time:</strong> {data.label}
+            </p>
+            <p style={{ margin: "0 0 6px 0" }}>
+                <strong>Portfolio Value:</strong> ${data.value}
+            </p>
+            <p style={{ margin: "0 0 6px 0" }}>
+                <strong>Trade Type:</strong> {data.type}
+            </p>
+            <p style={{ margin: "0 0 6px 0" }}>
+                <strong>Trade Price:</strong> ${data.price}
+            </p>
+            <p style={{ margin: "0 0 6px 0" }}>
+                <strong>Quantity:</strong> {data.quantity}
+            </p>
+            <p style={{ margin: 0 }}>
+                <strong>Trade Value:</strong> ${data.tradeValue}
+            </p>
+        </div>
+    );
+}
+
 export default function OverviewPage() {
     const [mode, setMode] = useState("LIVE");
     const [trades, setTrades] = useState([]);
@@ -43,7 +82,7 @@ export default function OverviewPage() {
         let cash = 10000;
         let btc = 0;
 
-        return trades.map((trade) => {
+        return trades.map((trade, index) => {
             const price = Number(trade.price);
             const qty = Number(trade.quantity);
 
@@ -58,9 +97,13 @@ export default function OverviewPage() {
             const totalValue = cash + btc * price;
 
             return {
-                time: formatShortTime(trade.timestamp),
+                time: index,
+                label: formatShortTime(trade.timestamp),
                 value: Number(totalValue.toFixed(2)),
                 price: Number(price.toFixed(2)),
+                type: trade.type,
+                quantity: Number(qty.toFixed(8)),
+                tradeValue: Number((qty * price).toFixed(2)),
             };
         });
     }, [trades]);
@@ -103,10 +146,21 @@ export default function OverviewPage() {
                     <ResponsiveContainer>
                         <LineChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="time" minTickGap={30} />
+                            <XAxis
+                                dataKey="time"
+                                minTickGap={30}
+                                tickFormatter={(value, index) => chartData[index]?.label || ""}
+                            />
                             <YAxis />
-                            <Tooltip />
-                            <Line type="monotone" dataKey="value" dot={false} stroke="#60a5fa" />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Line
+                                type="monotone"
+                                dataKey="value"
+                                stroke="#60a5fa"
+                                strokeWidth={2}
+                                dot={false}
+                                activeDot={{ r: 6 }}
+                            />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
