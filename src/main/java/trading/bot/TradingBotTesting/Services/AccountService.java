@@ -1,4 +1,4 @@
-package trading.bot.TradingBotTesting;
+package trading.bot.TradingBotTesting.Services;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;

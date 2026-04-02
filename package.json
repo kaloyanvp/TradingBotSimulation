@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "npm": "^11.12.1",
+    "recharts": "^3.8.1"
+  }
+}

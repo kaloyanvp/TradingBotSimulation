@@ -1,29 +1,49 @@
 package trading.bot.TradingBotTesting;
 
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import trading.bot.TradingBotTesting.Services.TradingBotService;
 
-@Service
+@Component
 public class BotScheduler {
 
     private final TradingBotService botService;
-    private boolean running = false;
+    private Thread botThread;
+    private volatile boolean running = false;
 
     public BotScheduler(TradingBotService botService) {
         this.botService = botService;
     }
 
-    @Scheduled(fixedRate = 5000)
-    public void run() {
-        if (this.running) botService.tick();
+    public void start() {
+        if (running) return;
+        running = true;
+        System.out.println("Starting Bot");
+
+        botThread = new Thread(() -> {
+            while (running) {
+                try {
+                    botService.tick(); // run a tick
+
+                    // Wait 5 seconds between ticks
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        });
+
+        botThread.start();
+
     }
 
-    // These must be public!
-    public void start() {
-        this.running = true;
-        this.run();
-    }
     public void stop() {
-        this.running = false;
+        running = false;
+        if (botThread != null) botThread.interrupt();
+        System.out.println("Bot stopped");
+    }
+
+    public boolean isRunning() {
+        return running;
     }
 }
